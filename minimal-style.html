@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コメント管理</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --primary: #0066CC;
+            --success: #00875A;
+            --text-primary: #1D1D1F;
+            --text-secondary: #86868B;
+            --background: #F5F5F7;
+            --surface: #FFFFFF;
+            --border: #D2D2D7;
+            --hover: #F5F5F7;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--background);
+            color: var(--text-primary);
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-top: 24px;
+        }
+        
+        .header h1 {
+            font-size: 40px;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        
+        .search-section {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+        
+        .search-input:focus {
+            border-color: var(--primary);
+        }
+        
+        .search-results {
+            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .search-result-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: background-color 0.2s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-result-item:hover {
+            background-color: var(--hover);
+        }
+        
+        .search-result-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: var(--surface);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .poster-section {
+            background: var(--surface);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .poster-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .poster-name {
+            font-size: 18px;
+            font-weight: 600;
+        }
+        
+        .comment-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        .comments-container {
+            padding: 16px;
+        }
+        
+        .comment-item {
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .comment-item:hover {
+            border-color: var(--primary);
+        }
+        
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .comment-date {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        .comment-link {
+            color: var(--primary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .comment-link:hover {
+            text-decoration: underline;
+        }
+        
+        .comment-content {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: inherit;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0051A2;
+        }
+        
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #006544;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: var(--surface);
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .empty-text {
+            font-size: 18px;
+            color: var(--text-secondary);
+        }
+        
+        .error {
+            background: #FFF0F0;
+            color: #D70015;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--success);
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            font-weight: 500;
+        }
+        
+        .floating-refresh {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .floating-refresh:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .comment-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .button-group {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --primary: #0A84FF;
+                --success: #32D74B;
+                --text-primary: #FFFFFF;
+                --text-secondary: #98989F;
+                --background: #000000;
+                --surface: #1C1C1E;
+                --border: #38383A;
+                --hover: #2C2C2E;
+            }
+            
+            .error {
+                background: #3A1F1F;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>コメント管理</h1>
+        </div>
+        
+        <div id="searchSection" class="search-section" style="display: none;">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="投稿者名で検索..."
+                autocomplete="off"
+            >
+            <div id="searchResults" class="search-results"></div>
+        </div>
+        
+        <div id="stats" class="stats-container" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-number" id="totalComments">0</div>
+                <div class="stat-label">未対応</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPosters">0</div>
+                <div class="stat-label">投稿者</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="todayComments">0</div>
+                <div class="stat-label">今日</div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            <p>読み込み中...</p>
+        </div>
+        
+        <div id="content" style="display: none;"></div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+    
+    <button class="floating-refresh" onclick="loadData()" title="更新">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+    </button>
+    
+    <div class="toast" id="successMessage">完了しました</div>
+    
+    <script src="config.js"></script>
+    <script src="minimal-script.js"></script>
+</body>
+</html>
