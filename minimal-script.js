@@ -258,13 +258,16 @@ async function markAsComplete(rowIndex, button, commentItem) {
         commentItem.style.transform = 'scale(0.98)';
         
         setTimeout(() => {
+            const posterSection = commentItem.closest('.poster-section');
+            const posterName = posterSection.getAttribute('data-poster');
+            
             commentItem.remove();
             
-            // ポスターセクションが空になったら削除
-            const posterSection = document.querySelector(`[data-poster="${commentItem.closest('.poster-section').getAttribute('data-poster')}"]`);
+            // 残りのコメントを確認
             const remainingComments = posterSection.querySelectorAll('.comment-item');
             
             if (remainingComments.length === 0) {
+                // ポスターセクション全体を削除
                 posterSection.style.transition = 'all 0.3s ease';
                 posterSection.style.opacity = '0';
                 
