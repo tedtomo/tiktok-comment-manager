@@ -255,10 +255,10 @@ async function markAsComplete(rowIndex, button, commentItem) {
         
         // コメントアイテムを削除
         const posterName = commentItem.getAttribute('data-poster');
+        const posterSection = commentItem.closest('.poster-section');
         commentItem.remove();
         
         // 同じ投稿者のコメント数を確認
-        const posterSection = document.getElementById(`poster-${posterName.replace(/\s/g, '-')}`);
         const remainingItems = posterSection.querySelectorAll('.comment-item');
         
         if (remainingItems.length === 0) {
