@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTokコメント管理ツール</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .poster-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            padding: 20px;
+        }
+        
+        .poster-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 10px;
+        }
+        
+        .comment-item {
+            background: #f9f9f9;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .comment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .comment-date {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .comment-url {
+            color: #007bff;
+            text-decoration: none;
+            font-size: 14px;
+            word-break: break-all;
+        }
+        
+        .comment-url:hover {
+            text-decoration: underline;
+        }
+        
+        .comment-content {
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            margin: 10px 0;
+            line-height: 1.6;
+            position: relative;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        button {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .copy-btn {
+            background: #17a2b8;
+            color: white;
+        }
+        
+        .copy-btn:hover {
+            background: #138496;
+        }
+        
+        .complete-btn {
+            background: #28a745;
+            color: white;
+        }
+        
+        .complete-btn:hover {
+            background: #218838;
+        }
+        
+        .complete-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+        
+        .no-comments {
+            text-align: center;
+            padding: 50px;
+            font-size: 18px;
+            color: #666;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .success-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #28a745;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
+        
+        .info-box {
+            background: #d1ecf1;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            border: 1px solid #bee5eb;
+        }
+        
+        @media (max-width: 768px) {
+            .comment-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .button-group {
+                flex-direction: column;
+                width: 100%;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>TikTokコメント管理ツール</h1>
+        
+        <div class="info-box">
+            <strong>使い方：</strong>
+            <ol>
+                <li>下記の「スプレッドシートで開く」をクリック</li>
+                <li>スプレッドシートでコメントを確認</li>
+                <li>対応したコメントのH列に「○」を入力</li>
+                <li>このページをリロードすると未対応コメントのみ表示されます</li>
+            </ol>
+        </div>
+        
+        <div id="loading" class="loading">データを読み込み中...</div>
+        <div id="content" style="display: none;"></div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+    
+    <div class="success-message" id="successMessage">コピーしました！</div>
+    
+    <script>
+        // スプレッドシートID
+        const SPREADSHEET_ID = '1J91iQTAn1mBImk14zqK9MApEuaQ0exwTHfcujuaOAtI';
+        const SHEET_URL = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/edit#gid=0`;
+        
+        // CSVデータを取得する関数（公開されたスプレッドシート用）
+        async function fetchSheetData() {
+            try {
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/export?format=csv`;
+                const response = await fetch(csvUrl);
+                
+                if (!response.ok) {
+                    throw new Error('データの取得に失敗しました');
+                }
+                
+                const csvText = await response.text();
+                return parseCSV(csvText);
+            } catch (error) {
+                console.error('Error:', error);
+                showError('データの取得に失敗しました。スプレッドシートが公開されているか確認してください。');
+                return [];
+            }
+        }
+        
+        // CSVをパースする関数
+        function parseCSV(csvText) {
+            const lines = csvText.split('\n');
+            const result = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                
+                const row = [];
+                let current = '';
+                let inQuotes = false;
+                
+                for (let j = 0; j < lines[i].length; j++) {
+                    const char = lines[i][j];
+                    
+                    if (char === '"' && (j === 0 || lines[i][j-1] === ',')) {
+                        inQuotes = true;
+                    } else if (char === '"' && inQuotes && (j === lines[i].length - 1 || lines[i][j+1] === ',')) {
+                        inQuotes = false;
+                    } else if (char === ',' && !inQuotes) {
+                        row.push(current);
+                        current = '';
+                    } else {
+                        current += char;
+                    }
+                }
+                row.push(current);
+                result.push(row);
+            }
+            
+            return result;
+        }
+        
+        // 未実行のコメントをフィルタリングする関数
+        function filterPendingComments(data) {
+            const headers = data[0];
+            const rows = data.slice(1);
+            
+            const pendingComments = [];
+            
+            rows.forEach((row, index) => {
+                // A列（投稿ID）が存在し、H列（ステータス）が空の場合
+                if (row[0] && !row[7]) {
+                    pendingComments.push({
+                        rowIndex: index + 2,
+                        postId: row[0],
+                        date: row[1],
+                        url: row[2],
+                        group: row[3],
+                        posterName: row[4],
+                        comment: row[5],
+                        slackNotification: row[6]
+                    });
+                }
+            });
+            
+            return pendingComments;
+        }
+        
+        // 投稿者ごとにグループ化する関数
+        function groupByPoster(comments) {
+            const grouped = {};
+            
+            comments.forEach(comment => {
+                if (!grouped[comment.posterName]) {
+                    grouped[comment.posterName] = [];
+                }
+                grouped[comment.posterName].push(comment);
+            });
+            
+            return grouped;
+        }
+        
+        // HTMLを生成する関数
+        function generateHTML(groupedComments) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '';
+            
+            // スプレッドシートへのリンクボタン
+            const linkButton = document.createElement('div');
+            linkButton.style.textAlign = 'center';
+            linkButton.style.marginBottom = '30px';
+            linkButton.innerHTML = `
+                <a href="${SHEET_URL}" target="_blank" style="
+                    display: inline-block;
+                    background: #007bff;
+                    color: white;
+                    padding: 12px 24px;
+                    border-radius: 5px;
+                    text-decoration: none;
+                    font-weight: bold;
+                ">スプレッドシートで開く</a>
+            `;
+            contentDiv.appendChild(linkButton);
+            
+            if (Object.keys(groupedComments).length === 0) {
+                contentDiv.innerHTML += '<div class="no-comments">未実行のコメントはありません</div>';
+                return;
+            }
+            
+            Object.entries(groupedComments).forEach(([posterName, comments]) => {
+                const posterSection = document.createElement('div');
+                posterSection.className = 'poster-section';
+                
+                const posterNameDiv = document.createElement('div');
+                posterNameDiv.className = 'poster-name';
+                posterNameDiv.textContent = posterName;
+                posterSection.appendChild(posterNameDiv);
+                
+                comments.forEach(comment => {
+                    const commentItem = document.createElement('div');
+                    commentItem.className = 'comment-item';
+                    
+                    const commentHeader = document.createElement('div');
+                    commentHeader.className = 'comment-header';
+                    
+                    const dateSpan = document.createElement('span');
+                    dateSpan.className = 'comment-date';
+                    dateSpan.textContent = comment.date;
+                    
+                    const urlLink = document.createElement('a');
+                    urlLink.className = 'comment-url';
+                    urlLink.href = comment.url;
+                    urlLink.target = '_blank';
+                    urlLink.textContent = 'TikTok投稿を見る';
+                    
+                    commentHeader.appendChild(dateSpan);
+                    commentHeader.appendChild(urlLink);
+                    
+                    const commentContent = document.createElement('div');
+                    commentContent.className = 'comment-content';
+                    commentContent.textContent = comment.comment;
+                    
+                    const buttonGroup = document.createElement('div');
+                    buttonGroup.className = 'button-group';
+                    
+                    const copyBtn = document.createElement('button');
+                    copyBtn.className = 'copy-btn';
+                    copyBtn.textContent = 'コピー';
+                    copyBtn.onclick = () => copyComment(comment.comment, copyBtn);
+                    
+                    buttonGroup.appendChild(copyBtn);
+                    
+                    commentItem.appendChild(commentHeader);
+                    commentItem.appendChild(commentContent);
+                    commentItem.appendChild(buttonGroup);
+                    
+                    posterSection.appendChild(commentItem);
+                });
+                
+                contentDiv.appendChild(posterSection);
+            });
+        }
+        
+        // コメントをコピーする関数
+        async function copyComment(comment, button) {
+            try {
+                await navigator.clipboard.writeText(comment);
+                const originalText = button.textContent;
+                button.textContent = 'コピーしました！';
+                button.style.background = '#5cb85c';
+                
+                showSuccessMessage();
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '#17a2b8';
+                }, 2000);
+            } catch (err) {
+                console.error('コピーに失敗しました:', err);
+                alert('コピーに失敗しました');
+            }
+        }
+        
+        // 成功メッセージを表示する関数
+        function showSuccessMessage() {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.style.display = 'block';
+            
+            setTimeout(() => {
+                successMessage.style.display = 'none';
+            }, 2000);
+        }
+        
+        // エラーメッセージを表示する関数
+        function showError(message) {
+            const errorDiv = document.getElementById('error');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+        
+        // データを読み込む関数
+        async function loadData() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('content').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            
+            const data = await fetchSheetData();
+            
+            if (data.length > 0) {
+                const pendingComments = filterPendingComments(data);
+                const groupedComments = groupByPoster(pendingComments);
+                generateHTML(groupedComments);
+                
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('content').style.display = 'block';
+            } else {
+                document.getElementById('loading').style.display = 'none';
+            }
+        }
+        
+        // ページ読み込み時にデータを取得
+        document.addEventListener('DOMContentLoaded', loadData);
+        
+        // 5分ごとに自動更新
+        setInterval(loadData, 5 * 60 * 1000);
+    </script>
+</body>
+</html>
