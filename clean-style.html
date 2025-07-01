@@ -37,11 +37,11 @@
         }
         
         .search-section {
-            background: #FFFFFF;
+            background: #F0F7FF;
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 24px;
-            border: 1px solid #E0E0E0;
+            border: 1px solid #D0E1F9;
         }
         
         .search-input {
@@ -89,11 +89,16 @@
         }
         
         .stat-card {
-            background: #FFFFFF;
+            background: linear-gradient(135deg, #F5F7FA 0%, #FAFBFC 100%);
             padding: 20px;
             border-radius: 12px;
-            border: 1px solid #E0E0E0;
+            border: 1px solid #E8E8E8;
             text-align: center;
+            transition: transform 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-2px);
         }
         
         .stat-number {
@@ -126,6 +131,7 @@
         
         .poster-header {
             padding: 16px 20px;
+            background: #F8F8FA;
             border-bottom: 1px solid #E0E0E0;
             display: flex;
             justify-content: space-between;
@@ -150,12 +156,14 @@
         .comment-item {
             padding: 16px;
             margin-bottom: 12px;
-            border: 1px solid #E0E0E0;
+            background: #FCFCFC;
+            border: 1px solid #E5E5E5;
             border-radius: 8px;
         }
         
         .comment-item:hover {
             border-color: #0066CC;
+            background: #F8FBFF;
         }
         
         .comment-meta {
@@ -231,9 +239,9 @@
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            background: #FFFFFF;
+            background: linear-gradient(135deg, #F0F9FF 0%, #E0F2FE 100%);
             border-radius: 12px;
-            border: 1px solid #E0E0E0;
+            border: 1px solid #B3D9FF;
         }
         
         .empty-text {
