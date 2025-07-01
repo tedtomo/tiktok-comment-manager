@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コメント管理</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background-color: #FFFFFF;
+            color: #333333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+            padding-top: 24px;
+        }
+        
+        .header h1 {
+            font-size: 40px;
+            font-weight: 600;
+            color: #000000;
+        }
+        
+        .search-section {
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            border: 1px solid #E0E0E0;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 16px;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            outline: none;
+        }
+        
+        .search-input:focus {
+            border-color: #0066CC;
+        }
+        
+        .search-results {
+            margin-top: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        
+        .search-result-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .search-result-item:hover {
+            background-color: #F5F5F5;
+        }
+        
+        .search-result-count {
+            font-size: 14px;
+            color: #666666;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: #FFFFFF;
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid #E0E0E0;
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 32px;
+            font-weight: 600;
+            color: #000000;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #666666;
+            margin-top: 4px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 60px 20px;
+            background: #FFFFFF;
+            border-radius: 12px;
+            border: 1px solid #E0E0E0;
+        }
+        
+        .poster-section {
+            background: #FFFFFF;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            overflow: hidden;
+            border: 1px solid #E0E0E0;
+        }
+        
+        .poster-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid #E0E0E0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .poster-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #000000;
+        }
+        
+        .comment-count {
+            font-size: 14px;
+            color: #666666;
+        }
+        
+        .comments-container {
+            padding: 16px;
+        }
+        
+        .comment-item {
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+        }
+        
+        .comment-item:hover {
+            border-color: #0066CC;
+        }
+        
+        .comment-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .comment-date {
+            color: #666666;
+            font-size: 14px;
+        }
+        
+        .comment-link {
+            color: #0066CC;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .comment-link:hover {
+            text-decoration: underline;
+        }
+        
+        .comment-content {
+            font-size: 15px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: #333333;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-primary {
+            background: #0066CC;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0051A2;
+        }
+        
+        .btn-success {
+            background: #00875A;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #006544;
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: #FFFFFF;
+            border-radius: 12px;
+            border: 1px solid #E0E0E0;
+        }
+        
+        .empty-text {
+            font-size: 18px;
+            color: #666666;
+        }
+        
+        .error {
+            background: #FFF0F0;
+            color: #D70015;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #00875A;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            display: none;
+            z-index: 1000;
+            font-weight: 500;
+        }
+        
+        .floating-refresh {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            width: 48px;
+            height: 48px;
+            background: #FFFFFF;
+            border: 1px solid #E0E0E0;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .floating-refresh:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .header h1 {
+                font-size: 32px;
+            }
+            
+            .stats-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .comment-meta {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .button-group {
+                width: 100%;
+            }
+            
+            .btn {
+                flex: 1;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>コメント管理</h1>
+        </div>
+        
+        <div id="searchSection" class="search-section" style="display: none;">
+            <input 
+                type="text" 
+                class="search-input" 
+                id="searchInput" 
+                placeholder="投稿者名で検索..."
+                autocomplete="off"
+            >
+            <div id="searchResults" class="search-results"></div>
+        </div>
+        
+        <div id="stats" class="stats-container" style="display: none;">
+            <div class="stat-card">
+                <div class="stat-number" id="totalComments">0</div>
+                <div class="stat-label">未対応</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalPosters">0</div>
+                <div class="stat-label">投稿者</div>
+            </div>
+        </div>
+        
+        <div id="loading" class="loading">
+            <p>読み込み中...</p>
+        </div>
+        
+        <div id="content" style="display: none;"></div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+    
+    <button class="floating-refresh" onclick="loadData()" title="更新">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+        </svg>
+    </button>
+    
+    <div class="toast" id="successMessage">完了しました</div>
+    
+    <script src="config.js"></script>
+    <script src="clean-script.js"></script>
+</body>
+</html>
