@@ -17,7 +17,7 @@
             --success: #00875A;
             --text-primary: #1D1D1F;
             --text-secondary: #86868B;
-            --background: #F5F5F7;
+            --background: #FFFFFF;
             --surface: #FFFFFF;
             --border: #D2D2D7;
             --hover: #F5F5F7;
@@ -54,7 +54,7 @@
             padding: 20px;
             border-radius: 12px;
             margin-bottom: 24px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
         }
         
         .search-input {
@@ -108,7 +108,7 @@
             background: var(--surface);
             padding: 20px;
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
             text-align: center;
         }
         
@@ -129,7 +129,7 @@
             padding: 60px 20px;
             background: var(--surface);
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
         }
         
         .poster-section {
@@ -137,7 +137,7 @@
             border-radius: 12px;
             margin-bottom: 16px;
             overflow: hidden;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
         }
         
         .poster-header {
@@ -250,7 +250,7 @@
             padding: 60px 20px;
             background: var(--surface);
             border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
         }
         
         .empty-text {
@@ -290,7 +290,7 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 50%;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
             cursor: pointer;
             transition: all 0.2s ease;
             display: flex;
@@ -374,10 +374,6 @@
             <div class="stat-card">
                 <div class="stat-number" id="totalPosters">0</div>
                 <div class="stat-label">投稿者</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="todayComments">0</div>
-                <div class="stat-label">今日</div>
             </div>
         </div>
         

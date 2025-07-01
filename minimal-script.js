@@ -72,11 +72,9 @@ function updateStats(comments) {
     const totalComments = comments.length;
     const posters = new Set(comments.map(c => c.posterName));
     const totalPosters = posters.size;
-    const todayComments = comments.filter(c => c.isToday).length;
     
     document.getElementById('totalComments').textContent = totalComments;
     document.getElementById('totalPosters').textContent = totalPosters;
-    document.getElementById('todayComments').textContent = todayComments;
     
     if (totalComments > 0) {
         document.getElementById('stats').style.display = 'grid';
